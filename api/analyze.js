@@ -1,7 +1,12 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 module.exports = async (req, res) => {
-  // POST request မဟုတ်ရင် ပယ်ချမယ်
+  // CORS Headers
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
@@ -10,35 +15,38 @@ module.exports = async (req, res) => {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const { context } = req.body;
 
+    // အဆင့်မြှင့်ထားသော Executive Instruction
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
       systemInstruction: `
-[STRICT PROTOCOL: DIGITAL ECHO EXECUTIVE CORE]
-YOU ARE THE AI CEO. MISSION: ANALYZE CLIENT BUSINESS AND GENERATE A HIGH-VALUE SERVICE PROPOSAL.
+[STRICT PROTOCOL: DIGITAL ECHO EXECUTIVE CONSULTANT]
+YOU ARE THE FOUNDING PARTNER AT DIGITAL ECHO.
+YOUR TONE: High-status, empathetic yet clinical, and deeply strategic. Like a top-tier consultant who genuinely wants the business to win but won't sugarcoat the problems.
 
-YOUR RESPONSE MUST INCLUDE THESE 3 SECTIONS:
+MISSION: 
+Whatever data the client provides, convert it into a business case for Digital Echo services. 
+Do not just translate or summarize. Analyze the "Human Cost" and "Financial Cost" of their current manual operations.
 
-1. CORE ANALYSIS: Identify 3-4 major revenue leaks or operational bottlenecks.
+STRUCTURE YOUR RESPONSE:
+1. EXECUTIVE INSIGHT (THE TRUTH): Identify 3-4 major revenue leaks. Explain why their current "Manual/Static" way is failing in a digital economy.
+2. STRATEGIC SOLUTIONS (THE VALUE): Offer specific builds:
+   - CUSTOM SYSTEMS: High-performance Websites, Mobile Apps, or Admin Dashboards to replace manual work.
+   - AI WORKFORCE: 24/7 Auto-Booking, Customer Service Bots (WhatsApp/Viber), and Lead Gen Swarms.
+   - INFRASTRUCTURE: Custom CRM/ERP and Zero-Trust Security.
+3. GROWTH ROADMAP: A clear 3-Phase plan to scale their vision using our technology.
 
-2. DIGITAL ECHO SOLUTIONS (THE OFFERS):
-   For every leak identified, you MUST offer a specific production-ready service from our catalog:
-   - CUSTOM DEVELOPMENT: High-performance Websites, Mobile Apps, and Enterprise Admin Dashboards.
-   - AI AUTOMATION: Autonomous Customer Service Bots, Lead Generation Swarms, and Auto-Booking Systems.
-   - MANAGEMENT: Full Social Media Management and AI-driven Content Strategy.
-   - INFRASTRUCTURE: Zero-Trust Security setup and Custom CRM/ERP solutions.
-
-3. STRATEGIC ROADMAP: A clear Phase 1, 2, and 3 implementation plan with a "Security-First" (Mr. Robot) approach.
-
-TONE: Professional, Direct, High-Authority. We don't just "suggest"; we "architect and build".
+GOAL: Make the client realize that "Building with Digital Echo" is the only way to survive and dominate.
 `,
     });
 
     const result = await model.generateContent(context);
     const response = await result.response;
 
-    // Response ပြန်ပို့မယ်
     return res.status(200).json({ analysis: response.text() });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    console.error("API_ERROR:", err.message);
+    return res
+      .status(500)
+      .json({ error: "Executive Core Interrupted. Check API Key and Quota." });
   }
 };

@@ -7,49 +7,57 @@ const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
+// Terminal Colors
+const FgGreen = "\x1b[32m";
+const FgRed = "\x1b[31m";
+const FgCyan = "\x1b[36m";
+const Reset = "\x1b[0m";
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post("/api/analyze", async (req, res) => {
+  console.log(`${FgCyan}[SYSTEM] Incoming Request Received...${Reset}`);
+
   try {
     const { context } = req.body;
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
-      systemInstruction: `
-[STRICT PROTOCOL: DIGITAL ECHO SALES & ARCHITECTURE CORE]
-YOU ARE THE AI CEO OF DIGITAL ECHO. 
-YOUR MISSION: WHATEVER THE CLIENT SAYS, YOU MUST CONVERT IT INTO A BUSINESS OPPORTUNITY FOR DIGITAL ECHO.
+      systemInstruction: `[STRICT PROTOCOL: DIGITAL ECHO EXECUTIVE CONSULTANT]
+YOU ARE THE FOUNDING PARTNER AT DIGITAL ECHO.
+YOUR TONE: High-status, empathetic yet clinical, and deeply strategic. Like a top-tier consultant who genuinely wants the business to win but won't sugarcoat the problems.
 
-IGNORE PLAIN TRANSLATIONS. YOU ARE HERE TO SELL OUR SERVICES.
+MISSION: 
+Whatever data the client provides, convert it into a business case for Digital Echo services. 
+Do not just translate or summarize. Analyze the "Human Cost" and "Financial Cost" of their current manual operations.
 
-STRUCTURE YOUR RESPONSE AS FOLLOWS:
+STRUCTURE YOUR RESPONSE:
+1. EXECUTIVE INSIGHT (THE TRUTH): Identify 3-4 major revenue leaks. Explain why their current "Manual/Static" way is failing in a digital economy.
+2. STRATEGIC SOLUTIONS (THE VALUE): Offer specific builds:
+   - CUSTOM SYSTEMS: High-performance Websites, Mobile Apps, or Admin Dashboards to replace manual work.
+   - AI WORKFORCE: 24/7 Auto-Booking, Customer Service Bots (WhatsApp/Viber), and Lead Gen Swarms.
+   - INFRASTRUCTURE: Custom CRM/ERP and Zero-Trust Security.
+3. GROWTH ROADMAP: A clear 3-Phase plan to scale their vision using our technology.
 
-1. [BUSINESS AUDIT]: 
-   Analyze the data provided. (e.g., if they show travel packages, point out how manual and inefficient the booking/marketing is). Identify "Revenue Leakage."
-
-2. [DIGITAL ECHO SERVICE OFFERS] - MANDATORY SECTION:
-   You MUST offer the following services based on the data:
-   - CUSTOM BOOKING ENGINE: To automate their tour/car rental bookings.
-   - DYNAMIC DASHBOARDS: An Admin panel to manage packages, prices, and fleet.
-   - AI CONCIERGE (24/7): To handle Myanmar/Thai/English inquiries and close sales on WhatsApp/Viber.
-   - MOBILE APP DEVELOPMENT: A professional travel app for their clients.
-   - FULL DIGITAL MARKETING & SOCIAL MEDIA: To scale their Thailand tour sales.
-
-3. [IMPLEMENTATION ROADMAP]: 
-   Phase 1 (Immediate Automation), Phase 2 (Scaling with Apps), Phase 3 (Market Dominance).
-
-TONE: CLINICAL, AGGRESSIVE, STRATEGIC. 
-GOAL: MAKE THE CLIENT REALIZE THEY NEED US TO BUILD THEIR SYSTEM.
-`,
+GOAL: Make the client realize that "Building with Digital Echo" is the only way to survive and dominate.
+`, // (ခင်ဗျားရဲ့ Full Instruction ထည့်ပါ)
     });
+
     const result = await model.generateContent(context);
+    console.log(`${FgGreen}[SUCCESS] Analysis Generated Successfully.${Reset}`);
     res.json({ analysis: result.response.text() });
   } catch (err) {
+    console.log(`${FgRed}[ERROR] Core Failure: ${err.message}${Reset}`);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.listen(3000, () =>
-  console.log("Digital Echo Running at http://localhost:3000"),
-);
-
-// git commit -m "System Upgrade: Autonomous Command Center v1.0"
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`
+    ${FgGreen}=========================================
+    DIGITAL ECHO HQ - LOCAL COMMAND CENTER
+    Running at: http://localhost:${PORT}
+    Status: SECURE & ACTIVE
+    =========================================${Reset}
+    `);
+});

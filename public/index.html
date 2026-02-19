@@ -44,12 +44,14 @@
         >
         <textarea
           id="businessContext"
+          aria-label="Business Context Input"
           class="w-full p-4 border border-gray-200 rounded-lg mb-4 h-40 font-mono text-sm focus:ring-2 focus:ring-black outline-none transition"
           placeholder="Enter business data, travel packages, or operational details..."
         ></textarea>
 
         <button
           id="btn"
+          aria-label="Deploy Analysis"
           onclick="runAnalysis()"
           class="w-full bg-black text-white font-bold py-4 rounded-lg hover:bg-gray-800 transition uppercase tracking-widest text-sm"
         >
@@ -71,46 +73,93 @@
         </div>
       </div>
 
-      <div id="result-container" class="mt-12 hidden text-left">
-        <details
-          class="mb-4 bg-gray-900 rounded-lg border border-green-900/30 overflow-hidden"
+      <div id="result-container" class="mt-10 hidden text-left">
+        <div
+          class="mb-4 bg-gray-900 rounded border border-green-900/30 overflow-hidden"
         >
-          <summary
-            class="cursor-pointer p-4 text-[10px] font-mono text-green-500/70 hover:bg-gray-800 transition uppercase tracking-widest"
+          <button
+            onclick="toggleInput()"
+            class="w-full flex justify-between items-center p-3 text-[10px] font-mono text-green-500 hover:bg-gray-800 transition uppercase"
           >
-            [SYSTEM] RAW_SOURCE_DATA (Click to View)
-          </summary>
+            <span>[LOG] SOURCE_INTEL_RETAINED</span>
+            <span id="toggle-icon">[ - ]</span>
+          </button>
           <div
             id="user-input-mirror"
-            class="p-6 text-xs font-mono text-gray-500 border-t border-green-900/20 bg-black leading-relaxed"
+            class="p-4 text-xs font-mono text-gray-400 border-t border-green-900/20 bg-black"
           ></div>
-        </details>
+        </div>
 
         <div
-          class="bg-black rounded-lg border border-green-500/30 overflow-hidden terminal-glow"
+          class="bg-black rounded-lg border border-green-500/50 shadow-2xl overflow-hidden terminal-glow"
         >
           <div
-            class="bg-gray-900 px-4 py-3 border-b border-green-500/20 flex items-center justify-between"
+            class="bg-gray-900 px-4 py-2 border-b border-green-500/30 flex items-center justify-between"
           >
-            <div class="flex space-x-2">
-              <div class="w-2.5 h-2.5 rounded-full bg-red-500/40"></div>
-              <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/40"></div>
-              <div class="w-2.5 h-2.5 rounded-full bg-green-500/40"></div>
-            </div>
             <span
-              class="text-[9px] font-mono text-green-500/50 tracking-[0.3em] uppercase"
-              >Executive Output Terminal</span
+              class="text-[10px] font-mono text-green-500 uppercase tracking-widest"
+              >Digital Echo Intelligence</span
             >
+            <div class="flex space-x-2">
+              <button
+                onclick="copyResult()"
+                class="text-[9px] bg-green-900/30 text-green-500 border border-green-900/50 px-2 py-1 rounded hover:bg-green-500 hover:text-black transition"
+              >
+                COPY_REPORT
+              </button>
+            </div>
           </div>
           <div
             id="result"
-            class="p-8 font-mono text-green-400 text-sm leading-7 min-h-[400px]"
+            class="p-8 font-mono text-green-400 text-sm leading-relaxed min-h-[400px]"
           ></div>
+        </div>
+      </div>
+
+      <div
+        id="action-section"
+        class="mt-6 flex flex-col space-y-4 animate-bounce"
+      >
+        <p
+          class="text-[10px] font-mono text-gray-400 text-center uppercase tracking-[0.2em]"
+        >
+          Ready to eliminate these leaks?
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="https://wa.me/+959259118807"
+            target="_blank"
+            class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-8 rounded text-xs font-mono uppercase tracking-widest text-center transition shadow-[0_0_15px_rgba(22,163,74,0.4)]"
+          >
+            Direct_WhatsApp_Access
+          </a>
+          <a
+            href="https://t.me/Luffy_Morningstar"
+            target="_blank"
+            class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded text-xs font-mono uppercase tracking-widest text-center transition shadow-[0_0_15px_rgba(37,99,235,0.4)]"
+          >
+            Secure_Telegram_Line
+          </a>
         </div>
       </div>
     </section>
 
     <script>
+      function toggleInput() {
+        const mirror = document.getElementById("user-input-mirror");
+        const icon = document.getElementById("toggle-icon");
+        mirror.classList.toggle("hidden");
+        icon.innerText = mirror.classList.contains("hidden")
+          ? "[ + ]"
+          : "[ - ]";
+      }
+
+      function copyResult() {
+        const text = document.getElementById("result").innerText;
+        navigator.clipboard.writeText(text);
+        alert("Report Copied to Cipher-Board.");
+      }
+
       async function runAnalysis() {
         const inputField = document.getElementById("businessContext");
         const resultContainer = document.getElementById("result-container");
@@ -118,53 +167,35 @@
         const userInputMirror = document.getElementById("user-input-mirror");
         const btn = document.getElementById("btn");
         const loadingDiv = document.getElementById("loading");
-        const statusText = document.getElementById("status-text");
 
-        if (!inputField.value.trim())
-          return alert("PROTOCOL ERROR: Data input required.");
+        if (!inputField.value.trim()) return;
 
-        // 1. UI STATE: LOADING
+        const savedInput = inputField.value; // Save it to show in mirror
         btn.disabled = true;
-        btn.innerText = "EXECUTING...";
         loadingDiv.classList.remove("hidden");
         resultContainer.classList.add("hidden");
-        userInputMirror.innerText = inputField.value;
-
-        // STATUS ROTATION
-        const msgs = [
-          "Mapping Revenue Leakage...",
-          "Architecting Custom Dashboards...",
-          "Simulating AI Workforce...",
-          "Finalizing Executive Offer...",
-        ];
-        let mIdx = 0;
-        const msgInterval = setInterval(() => {
-          statusText.innerText = msgs[mIdx++ % msgs.length];
-        }, 2000);
+        userInputMirror.innerText = savedInput;
 
         try {
           const response = await fetch("/api/analyze", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ context: inputField.value }),
+            body: JSON.stringify({ context: savedInput }),
           });
 
           const data = await response.json();
 
-          // 2. UI STATE: SUCCESS
-          clearInterval(msgInterval);
+          // SUCCESS: UI Transitions
           loadingDiv.classList.add("hidden");
           resultContainer.classList.remove("hidden");
+          inputField.value = ""; // CLEAR INPUT BOX (The Clean Move)
 
-          // TYPING EFFECT
           typeEffect(resultDiv, data.analysis);
         } catch (error) {
-          console.error(error);
           loadingDiv.classList.add("hidden");
-          alert("SYSTEM FAILURE: Check Console.");
+          console.error(error);
         } finally {
           btn.disabled = false;
-          btn.innerText = "Deploy Analysis";
         }
       }
 
